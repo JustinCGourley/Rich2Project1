@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Our simple HTTP server</title>
+  <link rel="stylesheet" type="text/css" href="/style.css">
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.34/browser.min.js"></script>
+  <script type="text/babel">
+
+    const parseJSON = (xhr, content) => {
+      const obj = JSON.parse(xhr.response);
+      
+      if(obj.message) 
+      {
+        const p = document.createElement('p');
+        p.textContent = `Message: ${obj.message}`;
+        content.appendChild(p);
+      }
+      else 
+      {
+        const userList = document.createElement('p');
+        userList.textContent = xhr.response;
+        content.appendChild(userList);
+      }
+    };
+
+    const getRequest = (e, user) => 
+    {
+      const xhr = new XMLHttpRequest();
+
+      xhr.open(user.querySelector('#methodSelect').value, user.querySelector('#urlField').value);
+      xhr.setRequestHeader ('Accept', 'application/json');
+      xhr.onload = () => handleResponse(xhr);
+      xhr.send();
+
+      e.preventDefault();
+
+      return false;
+    };
+
+    const sendPost = (e, name) => 
+    {
+      const xhr = new XMLHttpRequest();
+
+      xhr.open(name.getAttribute('method'), name.getAttribute('action'));
+      xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+      xhr.setRequestHeader ('Accept', 'application/json');
+      xhr.onload = () => handleResponse(xhr);
+      const formData = `name=${nameField.value}&age=${ageField.value}`;
+      xhr.send(formData);
+
+      e.preventDefault();
+
+      return false;
+    };
+
+    const handleResponse = (xhr) => {
+      const content = document.querySelector('#content');
+      switch(xhr.status) {
+        case 200:
+          content.innerHTML = `<b>Success</b>`;
+          break;
+        case 201:
+          content.innerHTML = '<b>Create</b>';
+          break;
+        case 204:
+          content.innerHTML = '<b>Updated (No Content)</b>';
+          return;
+        case 400:
+          content.innerHTML = `<b>Bad Request</b>`;
+          break;
+        case 404:
+          content.innerHTML = `<b>Resource Not Found</b>`;
+          break;
+        default:
+          content.innerHTML = `Error code not implemented by client.`;
+          break;
+      }
+      if(xhr.response) parseJSON(xhr, content);
+    };
+
+    const init = () => {
+      const name = document.querySelector('#nameForm');
+      const user = document.querySelector('#userForm');
+
+      const getUsers = (e) => getRequest(e, user);
+      const addUser = (e) => sendPost(e, name);
+      
+      name.addEventListener('submit', addUser);
+      user.addEventListener('submit', getUsers);
+    };
+
+    window.onload = init;
+  </script>
+</head>
+<body>
+  <section id="top">
+    <h3>POST Status Code Tests</h3>
+    <form id="nameForm" action="/addUser" method="post">
+      <label for="name">Name: </label>
+      <input id="nameField" type="text" name="name" />
+      <label for="age">Age: </label>
+      <input id="ageField" type="number" name="age" min="0" max="100" step="1"/>
+      <input type="submit" value="Add User" />
+    </form>
+    <form id="userForm" action="/getUsers" method="get">
+      <select id='urlField'>
+        <option value='/getUsers'>/getUsers</option>
+        <option value='/notReal'>/notReal</option>
+      </select>
+      <select id="methodSelect">
+        <option value="get">GET</option>
+        <option value="head">HEAD</option>
+      </select>
+      <input type="submit" value="Get User" />
+    </form>
+  </section>
+  <section id="content">
+  </section>
+</body>
+</html>

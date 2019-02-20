@@ -1,0 +1,27 @@
+{
+  "name": "http-api-assignment-ii",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./src/server.js",
+  "dependencies": {},
+  "devDependencies": {
+    "eslint": "^5.13.0",
+    "eslint-config-airbnb": "^17.1.0",
+    "eslint-plugin-import": "^2.16.0"
+  },
+  "scripts": {
+    "start": "node ./src/server.js",
+    "pretest": "eslint ./src --fix",
+    "test": "echo \"Tests Completed\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JustinCGourley/http-api-assignment-ii.git"
+  },
+  "author": "Justin Gourley",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/JustinCGourley/http-api-assignment-ii/issues"
+  },
+  "homepage": "https://github.com/JustinCGourley/http-api-assignment-ii#readme"
+}
