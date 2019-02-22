@@ -8,6 +8,7 @@ const port = process.env.PORT || process.env.NODE_PORT || 3000;
 const urlStruct = {
   '/': handler.getPage,
   '/style.css': handler.getStyle,
+  '/clientCreate': handler.getCreatePage,
   '/getUsers': handler.getUsers,
   '/notReal': handler.getNotReal,
   '/addUser': handler.addUser,

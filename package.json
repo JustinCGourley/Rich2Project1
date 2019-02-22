@@ -1,7 +1,7 @@
 {
-  "name": "http-api-assignment-ii",
+  "name": "project1",
   "version": "1.0.0",
-  "description": "",
+  "description": "project 1",
   "main": "./src/server.js",
   "dependencies": {},
   "devDependencies": {
@@ -16,12 +16,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/JustinCGourley/http-api-assignment-ii.git"
+    "url": "git+https://github.com/JustinCGourley/Rich2Project1.git"
   },
   "author": "Justin Gourley",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/JustinCGourley/http-api-assignment-ii/issues"
+    "url": "https://github.com/JustinCGourley/Rich2Project1/issues"
   },
-  "homepage": "https://github.com/JustinCGourley/http-api-assignment-ii#readme"
+  "homepage": "https://github.com/JustinCGourley/Rich2Project1#readme"
 }

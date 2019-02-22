@@ -7,6 +7,23 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.34/browser.min.js"></script>
   <script type="text/babel">
 
+    const parseJSON = (xhr, content) => {
+      const obj = JSON.parse(xhr.response);
+      
+      if(obj.message) 
+      {
+        const p = document.createElement('p');
+        p.textContent = `Message: ${obj.message}`;
+        content.appendChild(p);
+      }
+      else 
+      {
+        const userList = document.createElement('p');
+        userList.textContent = xhr.response;
+        content.appendChild(userList);
+      }
+    };
+
     const getRequest = (e, user) => 
     {
       const xhr = new XMLHttpRequest();
@@ -37,12 +54,37 @@
       return false;
     };
 
+    const handleResponse = (xhr) => {
+      const content = document.querySelector('#content');
+      switch(xhr.status) {
+        case 200:
+          content.innerHTML = `<b>Success</b>`;
+          break;
+        case 201:
+          content.innerHTML = '<b>Create</b>';
+          break;
+        case 204:
+          content.innerHTML = '<b>Updated (No Content)</b>';
+          return;
+        case 400:
+          content.innerHTML = `<b>Bad Request</b>`;
+          break;
+        case 404:
+          content.innerHTML = `<b>Resource Not Found</b>`;
+          break;
+        default:
+          content.innerHTML = `Error code not implemented by client.`;
+          break;
+      }
+      if(xhr.response) parseJSON(xhr, content);
+    };
+
     const init = () => {
       const name = document.querySelector('#nameForm');
       const addUser = (e) => sendPost(e, name);
       
       name.addEventListener('submit', addUser);
-
+      user.addEventListener('submit', getUsers);
     };
 
     window.onload = init;
@@ -50,17 +92,16 @@
 </head>
 <body>
   <section id="top">
-    <h3>Login</h3>
-    <form id="nameForm" action="/checkUser" method="post">
+    <h3>Create Account</h3>
+    <form id="nameForm" action="/addUser" method="post">
       <label for="name">Name: </label>
       <input id="nameField" type="text" name="name" />
       <label for="password">Password: </label>
       <input id="passwordField" type="text" name="password"/>
-      <input type="submit" value="Login" />
+      <input type="submit" value="Create Account" />
     </form>
   </section>
   <section id="content">
-    <a href="/clientCreate">Create new user</a>
   </section>
 </body>
 </html>
