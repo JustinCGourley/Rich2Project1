@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Our simple HTTP server</title>
+  <link rel="stylesheet" type="text/css" href="/style.css">
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.34/browser.min.js"></script>
+  <script type="text/babel">
+
+    const getRequest = (e, user) => 
+    {
+      const xhr = new XMLHttpRequest();
+
+      xhr.open(user.querySelector('#methodSelect').value, user.querySelector('#urlField').value);
+      xhr.setRequestHeader ('Accept', 'application/json');
+      xhr.onload = () => handleResponse(xhr);
+      xhr.send();
+
+      e.preventDefault();
+
+      return false;
+    };
+
+    const sendPost = (e, name) => 
+    {
+      const xhr = new XMLHttpRequest();
+
+      xhr.open(name.getAttribute('method'), name.getAttribute('action'));
+      xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+      xhr.setRequestHeader ('Accept', 'application/json');
+      xhr.onload = () => handleResponse(xhr);
+      const formData = `name=${nameField.value}&password=${passwordField.value}`;
+      xhr.send(formData);
+
+      e.preventDefault();
+
+      return false;
+    };
+
+    const init = () => {
+      const name = document.querySelector('#nameForm');
+      const addUser = (e) => sendPost(e, name);
+      
+      name.addEventListener('submit', addUser);
+
+    };
+
+    window.onload = init;
+  </script>
+</head>
+<body>
+  <section id="top">
+    <h3>Login</h3>
+    <form id="nameForm" action="/checkUser" method="post">
+      <label for="name">Name: </label>
+      <input id="nameField" type="text" name="name" />
+      <label for="password">Password: </label>
+      <input id="passwordField" type="text" name="password"/>
+      <input type="submit" value="Login" />
+    </form>
+  </section>
+  <section id="content">
+    <a href="/clientCreate">Create new user</a>
+  </section>
+</body>
+</html>

@@ -6,7 +6,7 @@
   
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.34/browser.min.js"></script>
   <script type="text/babel">
-
+    let user = "";
     const getRequest = (e, user) => 
     {
       const xhr = new XMLHttpRequest();
@@ -28,20 +28,82 @@
       xhr.open(name.getAttribute('method'), name.getAttribute('action'));
       xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
       xhr.setRequestHeader ('Accept', 'application/json');
-      xhr.onload = () => handleResponse(xhr);
+      xhr.onload = () => openMain(xhr);
       const formData = `name=${nameField.value}&password=${passwordField.value}`;
       xhr.send(formData);
 
       e.preventDefault();
-
       return false;
+    };
+
+    const sendData = (e, name) =>
+    {
+      const xhr = new XMLHttpRequest();
+
+      xhr.open(name.getAttribute('method'), name.getAttribute('action'));
+      xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+      xhr.setRequestHeader ('Accept', 'application/json');
+      xhr.onload = () => openMain(xhr);
+      const data = `user=${user}&amount=${amountField.value}&date=${dateField.value}&description=${descriptionField.value}&type=${typeField.value}`;
+      xhr.send(data);
+
+      e.preventDefault();
+      return false;
+
+    };
+
+    const parseJson = (xhr) =>
+    {
+      const obj = JSON.parse(xhr.response);
+      const content = document.querySelector('#content');
+      content.innerHTML = "";
+      const top = document.querySelector('#top');
+      const contentAdd = document.querySelector('#contentAdd');
+      content.style = "display: block";
+      contentAdd.style = "display: block";
+      top.style = "display: none";
+
+      console.dir(obj);
+
+      const topH = document.createElement('h1');
+      topH.textContent = `Hello ${obj.user}`;
+      content.appendChild(topH);
+      for (let i = 0; i < obj.data.length; i++)
+      {
+        const p = document.createElement('p');
+
+        p.textContent = `$${obj.data[i].amount} | ${obj.data[i].date} | ${obj.data[i].description} | ${obj.data[i].type}`;
+        content.appendChild(p);
+      }
+      user = obj.user;
+
+    }
+
+    const openMain = (xhr) =>
+    {
+      console.log(xhr);
+      if (xhr.status == 200 || xhr.status == 201)
+      {
+        if (xhr.response)
+        {
+          console.log("GO");
+          parseJson(xhr);
+        }
+      }
+      else
+      {
+        return;
+      }
     };
 
     const init = () => {
       const name = document.querySelector('#nameForm');
+      const data = document.querySelector('#dataForm');
       const addUser = (e) => sendPost(e, name);
-      
+      const addData = (e) => sendData(e, data);
+
       name.addEventListener('submit', addUser);
+      data.addEventListener('submit', addData);
 
     };
 
@@ -58,9 +120,23 @@
       <input id="passwordField" type="text" name="password"/>
       <input type="submit" value="Login" />
     </form>
-  </section>
-  <section id="content">
     <a href="/clientCreate">Create new user</a>
+  </section>
+  <section id="content" style = "display: none">
+  </section>
+  <section id="contentAdd" style = "display: none">
+    <h3>Add Data</h3>
+    <form id="dataForm" action="/addData" method="post">
+      <label for="amount">Amount: </label>
+      <input id="amountField" type="text"/><br>
+      <label for="date">Date: </label>
+      <input id="dateField" type="text"/><br>
+      <label for="description">Description: </label>
+      <input id="descriptionField" type="text"/><br>
+      <label for="type">Type: </label>
+      <input id="typeField" type="text"/><br>
+      <input type="submit" value="Add Data"/>
+    </form>
   </section>
 </body>
 </html>

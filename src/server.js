@@ -9,9 +9,10 @@ const urlStruct = {
   '/': handler.getPage,
   '/style.css': handler.getStyle,
   '/clientCreate': handler.getCreatePage,
-  '/getUsers': handler.getUsers,
+  '/checkUser': handler.checkUser,
   '/notReal': handler.getNotReal,
   '/addUser': handler.addUser,
+  '/addData': handler.addData,
   notFound: handler.getNotFound,
 };
 

@@ -58,13 +58,13 @@
       const content = document.querySelector('#content');
       switch(xhr.status) {
         case 200:
-          content.innerHTML = `<b>Success</b>`;
+          content.innerHTML = `<b>Success - Created Account</b>`;
           break;
         case 201:
           content.innerHTML = '<b>Create</b>';
           break;
         case 204:
-          content.innerHTML = '<b>Updated (No Content)</b>';
+          content.innerHTML = '<b>Updated Account</b>';
           return;
         case 400:
           content.innerHTML = `<b>Bad Request</b>`;
@@ -84,7 +84,6 @@
       const addUser = (e) => sendPost(e, name);
       
       name.addEventListener('submit', addUser);
-      user.addEventListener('submit', getUsers);
     };
 
     window.onload = init;
@@ -103,5 +102,6 @@
   </section>
   <section id="content">
   </section>
+  <a href="/">Back</a>  
 </body>
 </html>
