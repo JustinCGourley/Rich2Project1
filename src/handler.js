@@ -74,13 +74,17 @@ const addData = (request, response, body) => {
 const addUser = (request, response, body) => {
   console.dir(body);
   if (request.method === 'POST') {
-    if (body.name && body.password && body.name !== body.password) {
-      if (users[body.name]) {
-        users[body.name].password = body.password;
+    if (body.user && body.password && body.user !== body.password) {
+      if (users[body.user] && body.canUpdatePassword) {
+        users[body.user].password = body.password;
         response.writeHead(204);
-        console.dir(`updated user password to [${body.name}] - ${body.password}`);
-      } else {
-        users[body.name] = { name: body.name, password: body.password, data: [] };
+        console.dir(`updated user password to [${body.user}] - ${body.password}`);
+      } 
+      else if (users[body.user] && !body.canUpdatePassword){
+        response.writeHead(400, {'Content-Type': 'application/json'});
+        response.write(JSON.stringify({message: 'Username already exists, please choose a different one'}));
+      }else {
+        users[body.user] = { name: body.name, password: body.password, data: [] };
         response.writeHead(201, { 'Content-Type': 'application/json' });
         response.write(JSON.stringify({ message: 'Created successfully.' }));
         console.dir(`created new account [${body.name} - ${body.password}]`);

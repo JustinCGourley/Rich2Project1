@@ -46,7 +46,7 @@
       xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
       xhr.setRequestHeader ('Accept', 'application/json');
       xhr.onload = () => handleResponse(xhr);
-      const formData = `name=${nameField.value}&password=${passwordField.value}`;
+      const formData = `user=${userField.value}&password=${passwordField.value}&name=${nameField.value}&canUpdatePassword=false`;
       xhr.send(formData);
 
       e.preventDefault();
@@ -93,10 +93,15 @@
   <section id="top">
     <h3>Create Account</h3>
     <form id="nameForm" action="/addUser" method="post">
-      <label for="name">Name: </label>
-      <input id="nameField" type="text" name="name" />
+      <label for="user">Username: </label>
+      <input id="userField" type="text" name="user" />
+      <br>
       <label for="password">Password: </label>
       <input id="passwordField" type="text" name="password"/>
+      <br>
+      <label for="name">Name for account: </label>
+      <input id="nameField" type="text" name="name" />
+      <br>
       <input type="submit" value="Create Account" />
     </form>
   </section>
