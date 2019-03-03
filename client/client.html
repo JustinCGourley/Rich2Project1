@@ -138,7 +138,7 @@
           negative += Math.abs(parseFloat(data[i].amount));
         }
 
-        typeCheck[data[i].type] += parseFloat(data[i].amount);
+        typeCheck[data[i].type] += Math.abs(data[i].amount);
       }
 
       let chartData = google.visualization.arrayToDataTable([
