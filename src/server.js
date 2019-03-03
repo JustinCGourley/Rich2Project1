@@ -16,6 +16,7 @@ const urlStruct = {
   notFound: handler.getNotFound,
 };
 
+//parse all in comming requests
 const onRequest = (request, response) => {
   const parsedUrl = url.parse(request.url);
   const params = query.parse(parsedUrl.query);

@@ -12,20 +12,7 @@
     //load google charts
     google.charts.load('current', {'packages':['corechart']});
 
-    const getRequest = (e, user) => 
-    {
-      const xhr = new XMLHttpRequest();
-
-      xhr.open(user.querySelector('#methodSelect').value, user.querySelector('#urlField').value);
-      xhr.setRequestHeader ('Accept', 'application/json');
-      xhr.onload = () => handleResponse(xhr);
-      xhr.send();
-
-      e.preventDefault();
-
-      return false;
-    };
-
+    //sends post request to server giving name password and num of requested responces
     const sendPost = (e, name) => 
     {
       const num = document.querySelector('contentSelect');
@@ -42,6 +29,7 @@
       return false;
     };
 
+    //sends data to server to add to user based on user input
     const sendData = (e, name) =>
     {
       const num = document.querySelector('contentSelect');
@@ -59,6 +47,7 @@
 
     };
 
+    //parses given json data and adds it the the HTML to display to the user
     const parseJson = (xhr) =>
     {
       const obj = JSON.parse(xhr.response);
@@ -75,6 +64,7 @@
       let topH = document.querySelector('#contentName');
       topH.innerHTML = `Hello ${obj.name}`;
 
+      //creating the table with data
       table.innerHTML += "<tr><th>Amount</th><th>Date</th><th>Description</th><th>Type</th></tr>";
 
       for (let i = 0; i < obj.data.length; i++)
@@ -93,6 +83,7 @@
       showInfo(obj.data);
     };
 
+    //shows extra info after the table (highest and lowest amounts, total money)
     const showInfo = (data) =>
     {
       const content = document.querySelector('#contentExtras');
@@ -120,6 +111,8 @@
       showChart(data);
     };
 
+    //shows chart data (using google charts)
+    //shows data for positive v negative flow and money distribution based on type
     const showChart = (data) =>
     {
       const chart1 = document.querySelector('#chart1');
@@ -174,6 +167,7 @@
       chart.draw(chart2Data, options);
     };
 
+    //bad request
     const parseJSONBadRequest = (xhr) =>
     {
       const obj = JSON.parse(xhr.response);
@@ -182,6 +176,7 @@
       p.innerHTML = obj.message;
     };
 
+    //checks code being sent in and decides what to do with it
     const openMain = (xhr) =>
     {
       console.log(xhr);
@@ -199,6 +194,7 @@
       }
     };
 
+    //shows the add content menu based on button press
     const showMenu = () => {
       const contentAddMenu = document.querySelector('#contentAdd');
       const button = document.querySelector('#openAddMenu');
@@ -218,6 +214,7 @@
 
     };
 
+    //sets up all event listeners
     const init = () => {
       const name = document.querySelector('#nameForm');
       const data = document.querySelector('#dataForm');

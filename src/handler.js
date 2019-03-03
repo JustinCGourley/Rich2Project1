@@ -14,24 +14,26 @@ const users = {
   },
 };
 
+//get index page
 const getPage = (request, response) => {
   response.writeHead(200, { 'Content-Type': 'text/html' });
   response.write(index);
   response.end();
 };
-
+//get create user page
 const getCreatePage = (request, response) => {
   response.writeHead(200, { 'Content-Type': 'text/html' });
   response.write(createPage);
   response.end();
 };
-
+//get stylesheet
 const getStyle = (request, response) => {
   response.writeHead(200, { 'Content-Type': 'text/css' });
   response.write(style);
   response.end();
 };
 
+//check user info - return back user's data if account exists and given password is correct
 const checkUser = (request, response, params) => {
   console.dir(params);
 
@@ -41,6 +43,7 @@ const checkUser = (request, response, params) => {
     response.write(JSON.stringify({ message: 'Bad Login Given', error: 'Unauthroized' }));
   } else
   if (users[params.name].password === params.password) {
+    //good user and pass given -> send back data based on requested number of responces
     console.dir('good');
     response.writeHead(200, { 'Content-Type': 'application/json' });
     let dataToReturn = [];
@@ -53,7 +56,7 @@ const checkUser = (request, response, params) => {
         }
       }
     }
-
+    //return data
     response.write(JSON.stringify(
       { user: params.name, name: users[params.name].name, data: dataToReturn },
     ));
@@ -66,6 +69,8 @@ const checkUser = (request, response, params) => {
   response.end();
 };
 
+//add data to given user account - this method bypasses the need for a password as it can only be called after logging in
+//this method also returns al the users data to re-update the list the client has
 const addData = (request, response, body) => {
   console.dir('Add data');
   console.dir(body);
@@ -97,6 +102,7 @@ const addData = (request, response, body) => {
   }
 };
 
+//adds user to list of users given a username and password, as well as an optional name
 const addUser = (request, response, body) => {
   console.dir(body);
   if (request.method === 'POST') {
@@ -124,12 +130,13 @@ const addUser = (request, response, body) => {
   }
 };
 
+//return no page found message
 const getNotFound = (request, response) => {
   response.writeHead(404, { 'Content-Type': 'application/json' });
   response.write(JSON.stringify({ message: 'The page you are looking for was not found.', id: 'notFound' }));
   response.end();
 };
-
+//return bad oage request
 const getNotReal = (request, response) => {
   if (request.method === 'GET') {
     response.writeHead(404, { 'Content-Type': 'application/json' });
