@@ -4,9 +4,14 @@
   <title>Our simple HTTP server</title>
   <link rel="stylesheet" type="text/css" href="/style.css">
   
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.34/browser.min.js"></script>
   <script type="text/babel">
     let user = "";
+    let pass = "";
+    //load google charts
+    google.charts.load('current', {'packages':['corechart']});
+
     const getRequest = (e, user) => 
     {
       const xhr = new XMLHttpRequest();
@@ -23,28 +28,30 @@
 
     const sendPost = (e, name) => 
     {
+      const num = document.querySelector('contentSelect');
       const xhr = new XMLHttpRequest();
 
       xhr.open(name.getAttribute('method'), name.getAttribute('action'));
       xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
       xhr.setRequestHeader ('Accept', 'application/json');
       xhr.onload = () => openMain(xhr);
-      const formData = `name=${nameField.value}&password=${passwordField.value}`;
+      const formData = `name=${nameField.value}&password=${passwordField.value}&num=${contentSelect.value}`;
       xhr.send(formData);
-
       e.preventDefault();
+
       return false;
     };
 
     const sendData = (e, name) =>
     {
+      const num = document.querySelector('contentSelect');
       const xhr = new XMLHttpRequest();
 
       xhr.open(name.getAttribute('method'), name.getAttribute('action'));
       xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
       xhr.setRequestHeader ('Accept', 'application/json');
       xhr.onload = () => openMain(xhr);
-      const data = `user=${user}&amount=${amountField.value}&date=${dateField.value}&description=${descriptionField.value}&type=${typeField.value}`;
+      const data = `user=${user}&amount=${amountField.value}&date=${dateField.value}&description=${descriptionField.value}&type=${typeField.value}&num=${contentSelect.value}`;
       xhr.send(data);
 
       e.preventDefault();
@@ -56,28 +63,116 @@
     {
       const obj = JSON.parse(xhr.response);
       const content = document.querySelector('#content');
-      content.innerHTML = "";
+      const contentDisplay = document.querySelector('#contentDisplay');
       const top = document.querySelector('#top');
-      const contentAdd = document.querySelector('#contentAdd');
       content.style = "display: block";
-      contentAdd.style = "display: block";
       top.style = "display: none";
 
       console.dir(obj);
+      const table = document.querySelector('#contentTable');
+      table.innerHTML = "";
 
-      const topH = document.createElement('h1');
-      topH.textContent = `Hello ${obj.user}`;
-      content.appendChild(topH);
+      let topH = document.querySelector('#contentName');
+      topH.innerHTML = `Hello ${obj.name}`;
+
+      table.innerHTML += "<tr><th>Amount</th><th>Date</th><th>Description</th><th>Type</th></tr>";
+
       for (let i = 0; i < obj.data.length; i++)
       {
-        const p = document.createElement('p');
-
-        p.textContent = `$${obj.data[i].amount} | ${obj.data[i].date} | ${obj.data[i].description} | ${obj.data[i].type}`;
-        content.appendChild(p);
+        let amount = Math.abs(obj.data[i].amount);
+        let style = (obj.data[i].amount >= 0) ? "style=\"color: green\"" : "style=\"color: red\"";
+        if (obj.data[i].amount < 0){}
+        table.innerHTML += "<tr>";
+        table.innerHTML += `<td ${style}>${amount}</td><td>${obj.data[i].date}</td><td>${obj.data[i].description}</td><td>${obj.data[i].type}</td>`;
+        table.innerHTML += "</tr>";        
       }
+
       user = obj.user;
 
-    }
+
+      showInfo(obj.data);
+    };
+
+    const showInfo = (data) =>
+    {
+      const content = document.querySelector('#contentExtras');
+      content.innerHTML = "";
+      if (data === undefined || data[0] === undefined){return;}
+      let highest = parseFloat(data[0].amount);
+      let lowest = parseFloat(data[0].amount);
+      let total = 0;
+      for (let i = 0; i < data.length; i++)
+      {
+        let dataAmount = parseFloat(data[i].amount);
+        if (dataAmount < lowest){lowest = dataAmount;}
+        if (dataAmount > highest){highest = dataAmount;}
+        total += dataAmount;
+      }
+
+      let style = (total >= 0) ? "style=\"color:green\"" : "style=\"color:red\"";
+      let html = `<p ${style}>Total Earnings: $${total}</p>
+                  <p>Highest Earning: $${highest}</p>
+                  <p>Lowest Earning: $${lowest}</p>`;
+      content.innerHTML += html;
+
+      content.innerHTML += "<div id=\"chart1\"></div>";
+      content.innerHTML += "<div id=\"chart2\"></div>";
+      showChart(data);
+    };
+
+    const showChart = (data) =>
+    {
+      const chart1 = document.querySelector('#chart1');
+      const chart2 = document.querySelector('#chart2');
+
+      let positive = 0;
+      let negative = 0;
+      let typeCheck = {"Personal": 0, "Work": 0, "General": 0, "Food": 0, "Business": 0, "Service": 0};
+      for (let i = 0; i < data.length; i++)
+      {
+        if (parseFloat(data[i].amount) > 0){
+          positive += Math.abs(parseFloat(data[i].amount));
+        }
+        else if (parseFloat(data[i].amount) < 0)
+        {
+          negative += Math.abs(parseFloat(data[i].amount));
+        }
+
+        typeCheck[data[i].type] += parseFloat(data[i].amount);
+      }
+
+      let chartData = google.visualization.arrayToDataTable([
+        ['Income', 'Amount'],
+        ['Positive', positive],
+        ['Negative', negative]
+      ]);
+
+      let chart2Data = google.visualization.arrayToDataTable([
+        ['Type', 'Amount'],
+        ['Personal', typeCheck['Personal']],
+        ['Work', typeCheck['Work']],
+        ['General', typeCheck['General']],
+        ['Food', typeCheck['Food']],
+        ['Business', typeCheck['Business']],
+        ['Service', typeCheck['Service']],
+      ]);
+
+      let options = 
+      {
+        title: 'Positive v Negative Flow',
+        width: 500,
+        height: 350,
+        backgroundColor: 'grey',
+        is3D: true
+      };
+
+      let chart = new google.visualization.PieChart(chart1);
+      chart.draw(chartData, options);
+
+      options.title = 'Spending Based on Type';
+      chart = new google.visualization.PieChart(chart2);
+      chart.draw(chart2Data, options);
+    };
 
     const parseJSONBadRequest = (xhr) =>
     {
@@ -85,7 +180,7 @@
       const p = document.querySelector('#loginMessage');
 
       p.innerHTML = obj.message;
-    }
+    };
 
     const openMain = (xhr) =>
     {
@@ -104,15 +199,39 @@
       }
     };
 
+    const showMenu = () => {
+      const contentAddMenu = document.querySelector('#contentAdd');
+      const button = document.querySelector('#openAddMenu');
+
+      if (button.innerHTML === '&gt;')
+      {
+        contentAddMenu.style.width = "40%";
+        button.innerHTML = '<';
+        button.style.left = '40%';
+      }
+      else
+      {
+        contentAddMenu.style.width = "0%";
+        button.innerHTML = '>';
+        button.style.left = '0%';
+      }
+
+    };
+
     const init = () => {
       const name = document.querySelector('#nameForm');
       const data = document.querySelector('#dataForm');
+      const select = document.querySelector('#contentSelect');
       const addUser = (e) => sendPost(e, name);
       const addData = (e) => sendData(e, data);
+      const addSelect = (e) => sendPost(e, select);
 
       name.addEventListener('submit', addUser);
       data.addEventListener('submit', addData);
+      select.addEventListener('change', addSelect);
 
+      const openMenuButton = document.querySelector('#openAddMenu');
+      openMenuButton.onclick = showMenu;
     };
 
     window.onload = init;
@@ -126,28 +245,55 @@
       <input id="nameField" type="text" name="name" />
       <br>
       <label for="password">Password: </label>
-      <input id="passwordField" type="text" name="password"/>
+      <input id="passwordField" type="password" name="password"/>
       <br>
       <a href="/clientCreate" id="createNew">New? Create new user</a>
       <input type="submit" value="Login" id="loginButton"/>
     </form>
     <p id="loginMessage"> </p>
   </section>
-  <section id="content" style = "display: none">
-  </section>
-  <section id="contentAdd" style = "display: none">
-    <h3>Add Data</h3>
-    <form id="dataForm" action="/addData" method="post">
-      <label for="amount">Amount: </label>
-      <input id="amountField" type="text"/><br>
-      <label for="date">Date: </label>
-      <input id="dateField" type="text"/><br>
-      <label for="description">Description: </label>
-      <input id="descriptionField" type="text"/><br>
-      <label for="type">Type: </label>
-      <input id="typeField" type="text"/><br>
-      <input type="submit" value="Add Data"/>
-    </form>
-  </section>
+  <div id="content" style="display:none;">
+    <section id="contentDisplay">
+      <h1 id="contentName">Hello ___!</h1>
+      <div id="contentTableDiv">
+        <label>Show past: </label>
+        <select id="contentSelect" action="/checkUser" method="post">
+          <option value="10">10</option>
+          <option value="25" selected>25</option>
+          <option value="50">50</option>
+          <option value="100">100</option>
+          <option value="0">All</option>
+        </select>
+        <table id="contentTable">
+
+        </table>
+      </div>
+      <div id="contentExtras">
+
+      </div>
+    </section>
+    <section id="contentAdd">
+      <h3>Add Data</h3>
+      <form id="dataForm" action="/addData" method="post">
+        <label for="amount">Amount: </label>
+        <input id="amountField" type="number" step="0.01" max="1000000000"/><br>
+        <label for="date">Date: </label>
+        <input id="dateField" type="date"/><br>
+        <label for="description">Description: </label>
+        <input id="descriptionField" type="text"/><br>
+        <label for="type">Type: </label>
+        <select id ="typeField">
+          <option value="Personal">Personal</option>
+          <option value="Work">Work</option>
+          <option value="General">General</option>
+          <option value="Food">Food</option>
+          <option value="Business">Business</option>
+          <option value="Service">Service</option>
+        </select>
+        <input type="submit" value="Add Data" id="contentAddButton"/>
+      </form>
+    </section>
+    <button id="openAddMenu">></button>
+  </div>
 </body>
 </html>

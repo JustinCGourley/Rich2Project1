@@ -9,7 +9,7 @@ const users = {
     name: 'test',
     password: 'testPass',
     data: [{
-      amount: 100, date: '1/27/2019', description: 'Bought this as a test', type: 'Personal',
+      amount: 100, date: '2019-01-01', description: 'Bought this as a test', type: 'Personal',
     }],
   },
 };
@@ -43,7 +43,20 @@ const checkUser = (request, response, params) => {
   if (users[params.name].password === params.password) {
     console.dir('good');
     response.writeHead(200, { 'Content-Type': 'application/json' });
-    response.write(JSON.stringify({ user: params.name, data: users[params.name].data }));
+    let dataToReturn = [];
+    if (params.num === '0') {
+      dataToReturn = users[params.name].data;
+    } else {
+      for (let i = 0; i < params.num; i++) {
+        if (users[params.name].data[i] !== null && users[params.name].data[i] !== undefined) {
+          dataToReturn.push(users[params.name].data[i]);
+        }
+      }
+    }
+
+    response.write(JSON.stringify(
+      { user: params.name, name: users[params.name].name, data: dataToReturn },
+    ));
   } else {
     console.dir('bad');
     response.writeHead(401, { 'Content-Type': 'application/json' });
@@ -62,7 +75,20 @@ const addData = (request, response, body) => {
       users[body.user].data.push({
         amount: body.amount, date: body.date, description: body.description, type: body.type,
       });
-      response.write(JSON.stringify({ user: body.user, data: users[body.user].data }));
+
+      let dataToReturn = [];
+      if (body.num === '0') {
+        dataToReturn = users[body.user].data;
+      } else {
+        for (let i = 0; i < body.num; i++) {
+          if (users[body.user].data[i] !== null && users[body.user].data[i] !== undefined) {
+            dataToReturn.push(users[body.user].data[i]);
+          }
+        }
+      }
+      response.write(JSON.stringify(
+        { user: body.user, name: users[body.user].name, data: dataToReturn },
+      ));
     } else {
       response.writeHead(400, { 'Content-Type': 'application/json' });
       response.write(JSON.stringify({ message: 'All fields must be filled.', id: 'missingParams' }));
@@ -74,24 +100,25 @@ const addData = (request, response, body) => {
 const addUser = (request, response, body) => {
   console.dir(body);
   if (request.method === 'POST') {
-    if (body.user && body.password && body.user !== body.password) {
-      if (users[body.user] && body.canUpdatePassword) {
+    if (body.user && body.password) {
+      if (users[body.user] && body.canUpdatePassword === 'true') {
         users[body.user].password = body.password;
         response.writeHead(204);
         console.dir(`updated user password to [${body.user}] - ${body.password}`);
-      } 
-      else if (users[body.user] && !body.canUpdatePassword){
-        response.writeHead(400, {'Content-Type': 'application/json'});
-        response.write(JSON.stringify({message: 'Username already exists, please choose a different one'}));
-      }else {
-        users[body.user] = { name: body.name, password: body.password, data: [] };
+      } else if (users[body.user] && body.canUpdatePassword === 'false') {
+        response.writeHead(400, { 'Content-Type': 'application/json' });
+        response.write(JSON.stringify({ message: 'Username already exists, please choose a different one', id: 'User exists already' }));
+      } else {
+        const name = (body.name !== '') ? body.name : body.user;
+        console.dir(`Body Name: ${body.name}| gotten name: ${name}`);
+        users[body.user] = { name, password: body.password, data: [] };
         response.writeHead(201, { 'Content-Type': 'application/json' });
         response.write(JSON.stringify({ message: 'Created successfully.' }));
         console.dir(`created new account [${body.name} - ${body.password}]`);
       }
     } else {
       response.writeHead(400, { 'Content-Type': 'application/json' });
-      response.write(JSON.stringify({ message: 'Name and password are both required. Password must be different from username', id: 'missingParams' }));
+      response.write(JSON.stringify({ message: 'Username and password are both required.', id: 'missingParams' }));
     }
     response.end();
   }
